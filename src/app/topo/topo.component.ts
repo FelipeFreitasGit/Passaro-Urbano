@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Oferta } from '../shared/oferta.model'
+import { Observable, Subject, of } from 'rxjs';
+import { switchMap, debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
+import { Oferta } from '../shared/oferta.model';
 import { OfertasService } from '../ofertas.service';
 
 @Component({
@@ -13,19 +14,32 @@ export class TopoComponent implements OnInit {
 
   public ofertas: Observable<Oferta[]>
 
+  //** Subject recebe parametros de pesquisa e dispara Observables em sua strem de eventos */
+  private subjectPesquisa: Subject<string> = new Subject<string>()
+
   constructor(private ofertasService: OfertasService) { }
 
   ngOnInit() {
-  }
-
-  public pesquisa(termoDaBusca: string): void {
-    this.ofertas = this.ofertasService.pesquisaOfertas(termoDaBusca)
-
-    this.ofertas.subscribe(
-      (ofertas: Oferta[]) => console.log(ofertas),
-      (erro: any) => console.log('erro status ', erro.status),
-      () => console.log('Fluxo de eventos completo!')
+    this.ofertas = this.subjectPesquisa.pipe(
+      debounceTime(1000), //executa a ação do switchMap após 1 segundo
+      distinctUntilChanged(), //para fazer pesquisas distintas
+      switchMap((termo: string) => {
+        if (termo.trim() === '') {
+          return of<Oferta[]>([])
+        }
+        return this.ofertasService.pesquisaOfertas(termo)
+      }),
+      catchError((err: any) => {
+        return of<Oferta[]>([])
+      })
     )
   }
 
+  public pesquisa(termoDaBusca: string): void {
+    this.subjectPesquisa.next(termoDaBusca)
+  }
+
+  public limpaPesquisa(): void {
+    this.subjectPesquisa.next('')
+  }
 }
