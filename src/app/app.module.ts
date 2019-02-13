@@ -17,6 +17,7 @@ import { registerLocaleData } from '@angular/common';
 import ptBr from '@angular/common/locales/pt';
 import { DescricaoReduzida } from './util/descricao-reduzida.pipe';
 import { OrdemCompraComponent } from './ordem-compra/ordem-compra.component';
+import { ReactiveFormsModule } from '@angular/forms'
 registerLocaleData(ptBr)
 
 @NgModule({
@@ -36,6 +37,7 @@ registerLocaleData(ptBr)
   imports: [
     BrowserModule,
     HttpModule,
+    ReactiveFormsModule,
     RouterModule.forRoot(ROUTES)
   ],
   providers: [ { provide: LOCALE_ID, useValue: 'pt-PT' }],
