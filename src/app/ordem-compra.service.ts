@@ -21,6 +21,6 @@ export class OrdemCompraService {
       JSON.stringify(pedido),
       new RequestOptions({ headers: headers })
     )
-    .pipe(map((response: Response) => response.json()))
+    .pipe(map((response: Response) => response.json().id ))
   }
 }
